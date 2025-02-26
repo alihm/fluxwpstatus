@@ -191,40 +191,54 @@
             const statusResponses = await Promise.all(statusPromises);
             const statusData = statusResponses.map(res => res.data);
 
-            // Create nodes
+            // Create nodes with URL information
             const nodes = ips.map((ip, index) => ({
               id: ip,
               label: `${ip}\n${statusData[index].status}`,
-              color: statusData[index].status === 'OK' ? '#28a745' : '#dc3545'
+              color: statusData[index].status === 'OK' ? '#28a745' : '#dc3545',
+              url: `http://${ip}:${app.OpPort}/status`  // Add URL to node data
             }));
 
-            // Create edges
+            // Create edges (unchanged)
             const edges = [];
             const edgeSet = new Set();
             statusData.forEach((data, index) => {
               const fromIp = ips[index];
               const masterIp = data.masterIP;
 
-              // Master link (solid green)
               if (masterIp && fromIp !== masterIp && !edgeSet.has(`${fromIp}-${masterIp}`)) {
                 edges.push({
                   from: fromIp,
                   to: masterIp,
                   color: { color: '#28a745' },
-                  dashes: false
+                  dashes: false,
+                  arrows: {
+                    to: {
+                      enabled: true,
+                      type: "arrow",
+                      scaleFactor: 0.4
+                    }
+                  }
                 });
                 edgeSet.add(`${fromIp}-${masterIp}`);
               }
 
-              // Cluster connections (dashed green/red)
               data.clusterStatus.forEach(cs => {
                 const toIp = cs.ip.split(':')[0];
                 if (fromIp !== toIp && !edgeSet.has(`${fromIp}-${toIp}`)) {
                   edges.push({
                     from: fromIp,
                     to: toIp,
-                    color: { color: cs.active ? '#28a745' : '#dc3545' },
-                    dashes: true
+                    color: { color: cs.active ? '#28a745' : '#dc3545' , opacity: 0.6 },
+                    dashes: true,
+                    width: 1,
+                    arrows: {
+                      to: {
+                        enabled: true,
+                        type: "arrow",
+                        scaleFactor: 0.4
+                      }
+                    }
                   });
                   edgeSet.add(`${fromIp}-${toIp}`);
                 }
@@ -261,9 +275,33 @@
                 },
                 maxVelocity: 50,
                 solver: 'forceAtlas2Based'
+              },
+              interaction: {
+                hover: true  // Optional: adds hover effects
               }
             };
-            new vis.Network(container, networkData, options);
+            const network = new vis.Network(container, networkData, options);
+
+            // Add click event listener
+            network.on('click', (params) => {
+              if (params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
+                const node = nodes.find(n => n.id === nodeId);
+                if (node && node.url) {
+                  window.open(node.url, '_blank'); // Opens in new tab
+                  // Alternatively, use window.location.href = node.url for same tab
+                }
+              }
+            });
+
+            // Optional: Add cursor style to indicate clickability
+            network.on('hoverNode', () => {
+              container.style.cursor = 'pointer';
+            });
+            network.on('blurNode', () => {
+              container.style.cursor = 'default';
+            });
+
           } catch (error) {
             console.error('Error inspecting app:', error);
             this.loading = false;
