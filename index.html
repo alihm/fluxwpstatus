@@ -25,6 +25,7 @@
     }
     .grey { background-color: grey; }
     .green { background-color: green; }
+    .yellow { background-color: yellow; }
     .red { background-color: red; }
     .card {
       background-color: #2c2c2c;
@@ -138,7 +139,7 @@
           return this.wordpressApps.length;
         },
         okApps() {
-          return this.wordpressApps.filter(app => app.status === 'green').length;
+          return this.wordpressApps.filter(app => app.status === 'green' || app.status === 'yellow').length;
         },
         downApps() {
           return this.wordpressApps.filter(app => app.status === 'red').length;
@@ -171,7 +172,15 @@
             const response = await axios.head(app.url, { timeout: 10000 });
             app.status = response.status === 200 ? 'green' : 'red';
           } catch (error) {
-            app.status = 'red';
+            if (error.response) {
+              // Server responded with a status other than 2xx
+              app.status = 'red';
+            } else if (error.request) {
+              app.status = 'yellow';
+            } else {
+              app.status = 'red';
+            }
+            
           }
         },
         async inspectApp(app) {
