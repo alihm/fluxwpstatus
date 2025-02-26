@@ -194,7 +194,7 @@
 
             // Fetch status data for each IP
             const statusPromises = ips.map(ip => 
-              axios.get(`https://thingproxy.freeboard.io/fetch/http://${ip}:${app.OpPort}/status`, { timeout: 5000 })
+              axios.get(`http://${ip}:${app.OpPort}/status`, { timeout: 5000 })
                 .catch(() => ({ data: { status: 'DOWN', masterIP: null, clusterStatus: [] } }))
             );
             const statusResponses = await Promise.all(statusPromises);
@@ -205,10 +205,10 @@
               id: ip,
               label: `${ip}\n${statusData[index].status}`,
               color: statusData[index].status === 'OK' ? '#28a745' : '#dc3545',
-              url: `http://${ip}:${app.OpPort}/status`  // Add URL to node data
+              url: `http://${ip}:${app.OpPort}/status`
             }));
 
-            // Create edges (unchanged)
+            // Create edges
             const edges = [];
             const edgeSet = new Set();
             statusData.forEach((data, index) => {
@@ -286,24 +286,20 @@
                 solver: 'forceAtlas2Based'
               },
               interaction: {
-                hover: true  // Optional: adds hover effects
+                hover: true
               }
             };
             const network = new vis.Network(container, networkData, options);
-
-            // Add click event listener
             network.on('click', (params) => {
               if (params.nodes.length > 0) {
                 const nodeId = params.nodes[0];
                 const node = nodes.find(n => n.id === nodeId);
                 if (node && node.url) {
-                  window.open(node.url, '_blank'); // Opens in new tab
-                  // Alternatively, use window.location.href = node.url for same tab
+                  window.open(node.url, '_blank');
                 }
               }
             });
 
-            // Optional: Add cursor style to indicate clickability
             network.on('hoverNode', () => {
               container.style.cursor = 'pointer';
             });
