@@ -319,7 +319,7 @@
       },
       mounted() {
         this.fetchApps();
-        this.appInterval = setInterval(() => this.fetchApps(), 5 * 60 * 1000); // Every 5 minutes
+        this.appInterval = setInterval(() => this.fetchApps(), 10 * 60 * 1000); // Every 5 minutes
         this.statusInterval = setInterval(() => {
           this.wordpressApps.forEach(app => this.checkStatus(app));
         }, 60 * 1000); // Every 1 minute
