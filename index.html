@@ -154,7 +154,7 @@
                 },
                 checkAppStatuses() {
                     this.apps.forEach(app => {
-                        axios.get(app.url, { timeout: 5000 })
+                        axios.head(app.url, { timeout: 10000 })
                             .then(response => {
                                 app.status = response.status === 200 ? 'green' : 'red';
                             })
