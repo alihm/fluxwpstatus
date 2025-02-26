@@ -194,7 +194,7 @@
 
             // Fetch status data for each IP
             const statusPromises = ips.map(ip => 
-              axios.get(`http://${ip}:${app.OpPort}/status`, { timeout: 5000 })
+              axios.get(`https://cors-anywhere.herokuapp.com/http://${ip}:${app.OpPort}/status`, { timeout: 5000 })
                 .catch(() => ({ data: { status: 'DOWN', masterIP: null, clusterStatus: [] } }))
             );
             const statusResponses = await Promise.all(statusPromises);
