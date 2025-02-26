@@ -134,7 +134,7 @@
                         .then(response => {
                             if (response.data.status === 'success') {
                                 this.apps = response.data.data
-                                    .filter(app => app.name.startsWith('wordpress'))
+                                    .filter(app => app.name.startsWith('wordpress1'))
                                     .map(app => {
                                         const operator = app.compose.find(c => c.name === 'operator');
                                         const OpPort = operator?.ports[operator.ports.length - 1] || null;
